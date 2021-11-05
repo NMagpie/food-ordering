@@ -30,4 +30,8 @@ public class RestaurantsData {
         return null;
     }
 
+    public void addRating(Rating rating) {
+        getRestById(rating.getRestaurantId()).addRating(rating.getRating());
+    }
+
 }

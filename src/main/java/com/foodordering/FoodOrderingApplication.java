@@ -1,7 +1,6 @@
 package com.foodordering;
 
 import com.foodordering.restaurantsdata.RestaurantsData;
-import lombok.Getter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -17,10 +16,14 @@ public class FoodOrderingApplication {
 
 	private static final SpringApplication app = new SpringApplication(FoodOrderingApplication.class);
 
+	private static String port;
+
 	private static final RestaurantsData restaurantsData = new RestaurantsData();
 
 	public static void main(String[] args) {
+		app.setDefaultProperties(Collections.singletonMap("server.port", port));
 
+		app.run();
 	}
 
 	public static RestaurantsData getRestaurantsData() {
@@ -35,13 +38,9 @@ public class FoodOrderingApplication {
 
 				Scanner scanner = new Scanner(config);
 
-				String port = scanner.nextLine();
+				port = scanner.nextLine();
 
 				if (!port.matches("^\\d{4,5}$")) throw new NoSuchElementException();
-
-				app.setDefaultProperties(Collections.singletonMap("server.port", port));
-
-				app.run();
 
 			} catch (FileNotFoundException e) {
 				parsingError(1);

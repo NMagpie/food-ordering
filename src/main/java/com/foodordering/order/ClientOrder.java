@@ -13,6 +13,8 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
@@ -56,30 +58,22 @@ public class ClientOrder {
 
         for (Order order : orders) {
 
-            String json;
-
             Restaurant restaurant = restaurantsData.getRestById(order.getRestaurantId());
 
-            if (restaurant == null) {
-                orderResponses.add(null); continue;
-            }
+            if (restaurant == null) continue;
 
             String url = restaurant.getAddress();
 
             url = "http://" + url + "/v2/order";
 
             try {
-                json = mapper.writeValueAsString(order);
-
-                HttpEntity<String> request = new HttpEntity<>(json, headers);
+                HttpEntity<Order> request = new HttpEntity<>(order, headers);
 
                 String strResponse = restTemplate.postForObject(url, request, String.class);
 
                 OrderResponse response = mapper.readValue(strResponse, OrderResponse.class);
 
-                if (response.getAddress() == null) {
-                    orderResponses.add(null); continue;
-                }
+                if (response.getAddress() == null) continue;
 
                 orderResponses.add(response);
 
@@ -87,9 +81,11 @@ public class ClientOrder {
 
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
-            } catch (ResourceAccessException e) {
+            } catch (ResourceAccessException | HttpClientErrorException | HttpServerErrorException e) {
                 restaurant.addRejectNumber();
-                if (restaurant.getRejectNumber() > 1) restaurantsData.remove(restaurant);
+                if (restaurant.getRejectNumber() > 1) { restaurantsData.remove(restaurant);
+                    System.out.println("Restaurant" + restaurant.getName() + "was not responding for two times, it's time to exclude it!");
+                }
             }
 
         }
