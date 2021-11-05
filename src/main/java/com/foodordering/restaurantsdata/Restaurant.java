@@ -15,6 +15,7 @@ public class Restaurant {
     private final int id;
 
     @JsonProperty("name")
+    @Getter
     private final String name;
 
     @JsonProperty(value = "address" , access = JsonProperty.Access.WRITE_ONLY)
@@ -28,7 +29,13 @@ public class Restaurant {
     private final ArrayList<Foods> menu;
 
     @JsonProperty("rating")
-    private final float rating;
+    private float rating;
+
+    @JsonIgnore
+    private int ratings = 0;
+
+    @JsonIgnore
+    private int rates = 0;
 
     @JsonIgnore
     @Getter
@@ -55,6 +62,14 @@ public class Restaurant {
 
     public void resetRejectNumber() {
         rejectNumber = 0;
+    }
+
+    public void addRating(int rating) {
+        rates++;
+
+        ratings += rating;
+
+        this.rating = (float) ratings / rates;
     }
 
 }
